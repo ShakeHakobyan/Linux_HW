@@ -1,4 +1,4 @@
-﻿#include "HTTP_Server.h"
+#include "HTTP_Server.h"
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -13,12 +13,29 @@
 Request::Request(std::string _request)
 {
     std::vector<std::string> lines = split_string(_request, "\n");
-    std::vector<std::string> first_line = split_string(lines[0], "\n");
-    method = first_line[0];
-    url = first_line[1];
-    version = first_line[2];
 
-    /**/
+    // spliting start line
+    std::vector<std::string> start_line = split_string(lines[0], "\n");
+    method = start_line[0];
+    url = start_line[1];
+    version = start_line[2];
+    
+    // spliting headers
+    int i = 1;
+    while (i < lines.size() && lines[i] != "\n")
+    {
+        std::vector<std::string> header = split_string(lines[i], ":");
+        headers[header[0]] = header[1];
+        ++i;
+    }
+    
+    // spliting body
+    ++i;
+    while (i < lines.size())
+    {
+        body += lines[i];
+        ++i;
+    }
 }
 
 
@@ -38,7 +55,23 @@ std::vector<std::string> Request::split_string(const std::string& str, const std
     return strings;
 }
 
+std::string Response::make_response()
+{
+    std::string response = "";
+    // conecting status line
+    response += version + " " + status_code + " " + status_text + "\n";
 
+    // conecting headers
+    for (const auto& header : headers)
+    {
+        response += header.first + "\n";
+    }
+
+    // conecting body
+    response += body;
+    
+    return response;
+}
 
 Server::Server(int p) : port(p)
 {
@@ -74,10 +107,10 @@ void Server::serve(int client_fd)
     }
 
     Request request(request_str);
+    Response response = handle(request);
+    std::string response_str  = response.make_responce();
 
-    /**/
-
-    ssize_t sent_bytes = send(client_fd, (const void*)&responce, sizeof(responce), 0);
+    ssize_t sent_bytes = send(client_fd, (const void*)&response_str, sizeof(response_str), 0);
 
     if (sent_bytes < 0)
     {
