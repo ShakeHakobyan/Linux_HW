@@ -1,4 +1,4 @@
-﻿// HTTP_Server.h : Include file for standard system include files,
+// HTTP_Server.h : Include file for standard system include files,
 // or project specific include files.
 
 #pragma once
@@ -14,8 +14,7 @@
 #include <unordered_map>
 #include <sstream>
 
-// TODO: Add bodys for Handler, Response classes, 
-// figure it out with Handler logic and boost thread pool
+// TODO: Figure it out with Handler logic and boost thread pool
 
 class Request
 {
@@ -33,7 +32,17 @@ private:
 
 class Responce
 {
+public:
+    std::string version;
+    std::string status_code;
+    std::string status_text;
+    std::unordered_map<std::string, std::string> headers;
+    std::string body;
 
+    Responce(std::string _version, std::string _status_code, std::string _status_text, std::unordered_map<std::string, std::string> _headers, std::string _body) :
+        version(_version), status_code(_status_code), status_text(_status_text), headers(_headers), body(_body) {}
+
+    std::string make_responce();
 };
 
 
