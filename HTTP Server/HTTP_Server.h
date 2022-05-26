@@ -14,8 +14,9 @@
 #include <unordered_map>
 #include <sstream>
 
-// TODO: Figure it out with Handler logic and boost thread pool
-
+// TODO: Figure it out with boost thread pool
+// Change string to char* in Request and Responce
+// Build Handler class
 class Request
 {
 public:
