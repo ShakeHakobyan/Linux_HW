@@ -11,8 +11,8 @@
 #include <unordered_map>
 #include <sstream>
 
-// TODO: Figure it out with boost thread pool
-// Build Handler class
+// TODO: Figure it out with boost thread pool, passing and getting results
+
 
 class Request
 {
@@ -29,6 +29,7 @@ private:
     std::vector<std::string> Request::split_string(const std::string& str, const std::string& delimiter);
 };
 
+
 class Response
 {
 public:
@@ -38,16 +39,17 @@ public:
     std::unordered_map<std::string, std::string> headers;
     std::string body;
 
+    Response() {}
     Response(std::string _version, std::string _status_code, std::string _status_text, std::unordered_map<std::string, std::string> _headers, std::string _body) :
         version(_version), status_code(_status_code), status_text(_status_text), headers(_headers), body(_body) {}
 
-    std::string make_Response();
+    std::string make_response();
 };
 
 
 class Handler
 {
-
+    virtual bool handling(Request& request, Response& response) = 0;
 };
 
 
@@ -57,7 +59,7 @@ public:
     int port;
     int server_fd;
     sockaddr_in address;
-    boost::asio::thread_pool pool;
+    boost::asio::thread_pool pool(4);
     std::vector<Handler> handlers;
 
     Server(int p);

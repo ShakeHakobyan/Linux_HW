@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <sstream>
 
+
 Request::Request(char* _request)
 {
     size_t start_idx = 0;
@@ -48,6 +49,7 @@ Request::Request(char* _request)
     }
 }
 
+
 std::string Request::split_char_until(const char* _request, size_t& start_idx, const char& delimiter)
 {
     std::string line = "";
@@ -59,6 +61,7 @@ std::string Request::split_char_until(const char* _request, size_t& start_idx, c
     ++start_idx;
     return line;
 }
+
 
 std::vector<std::string> Request::split_string(const std::string& str, const std::string& delimiter)
 {
@@ -75,6 +78,8 @@ std::vector<std::string> Request::split_string(const std::string& str, const std
 
     return strings;
 }
+
+
 
 char* Response::make_response()
 {
@@ -101,6 +106,8 @@ char* Response::make_response()
     return response_char;
 }
 
+
+
 Server::Server(int p) : port(p)
 {
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -123,10 +130,12 @@ Server::Server(int p) : port(p)
     }
 }
 
+
 void Server::serve(int client_fd)
 {
-    std::string request_str;
-    ssize_t received_bytes = recv(client_fd, (void*)&request_str, sizeof(request_str), 0);
+    int buffer_size = 1000000;
+    char* request_char;
+    ssize_t received_bytes = recv(client_fd, (void*)&request_char, buffer_size, 0);
 
     if (received_bytes < 0) {
         std::cerr << "Could not read from client. Error: " << strerror(errno) << std::endl;
@@ -134,11 +143,15 @@ void Server::serve(int client_fd)
         continue;
     }
 
-    Request request(request_str);
-    Response response = handle(request);
-    std::string response_str  = response.make_Response();
+    Request request(request_char);
+    Response response();
+    for(auto& handler : handlers)
+    {
+        boost::asio::post(tp, std::bind(handler.handling, request, response));
+    }
+    char* response_char  = response.make_response();
 
-    ssize_t sent_bytes = send(client_fd, (const void*)&response_str, sizeof(response_str), 0);
+    ssize_t sent_bytes = send(client_fd, (const void*)&response_char, buffer_size, 0);
 
     if (sent_bytes < 0)
     {
@@ -149,6 +162,7 @@ void Server::serve(int client_fd)
 
     close(client_fd);
 }
+
 
 void Server::run()
 {
