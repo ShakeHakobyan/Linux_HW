@@ -1,6 +1,3 @@
-// HTTP_Server.h : Include file for standard system include files,
-// or project specific include files.
-
 #pragma once
 
 #include <iostream>
@@ -15,8 +12,8 @@
 #include <sstream>
 
 // TODO: Figure it out with boost thread pool
-// Change string to char* in Request and Responce
 // Build Handler class
+
 class Request
 {
 public:
@@ -26,12 +23,13 @@ public:
     std::unordered_map<std::string, std::string> headers;
     std::string body;
 
-    Request(std::string _request);
+    Request(char* _request);
 private:
-    std::vector<std::string> split_string(const std::string& str, const std::string& delimiter);
+    std::string Request::split_char_until(const char* _request, size_t& start_idx, const char& delimiter);
+    std::vector<std::string> Request::split_string(const std::string& str, const std::string& delimiter);
 };
 
-class Responce
+class Response
 {
 public:
     std::string version;
@@ -40,10 +38,10 @@ public:
     std::unordered_map<std::string, std::string> headers;
     std::string body;
 
-    Responce(std::string _version, std::string _status_code, std::string _status_text, std::unordered_map<std::string, std::string> _headers, std::string _body) :
+    Response(std::string _version, std::string _status_code, std::string _status_text, std::unordered_map<std::string, std::string> _headers, std::string _body) :
         version(_version), status_code(_status_code), status_text(_status_text), headers(_headers), body(_body) {}
 
-    std::string make_responce();
+    std::string make_Response();
 };
 
 
